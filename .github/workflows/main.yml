@@ -1,0 +1,32 @@
+# 1. Nombre del flujo de trabajo
+name: CI/CD Pipeline Docker Hub
+
+# 2. El disparador (Trigger)
+on:
+  pull_request:
+    [cite_start]branches: [ "main" ] # Se activa solo al hacer un PR hacia main 
+
+# 3. Lista de tareas (Jobs)
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest # Usa un servidor virtual de GitHub con Linux
+    
+    steps:
+      # Paso 1: Descargar el código del repositorio en el servidor de GitHub
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      # Paso 2: Autenticación en Docker Hub usando tus Secrets [cite: 11, 14]
+      - name: Login en Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.USER_DOCKERHUB }}
+          password: ${{ secrets.PASSWORD_DOCKERHUB }}
+
+      # Paso 3: Construir la imagen y subirla (Build & Push) 
+      - name: Build and Push
+        uses: docker/build-push-action@v5
+        with:
+          context: . # Busca el Dockerfile en la raíz del proyecto
+          push: true  # Sube la imagen a Docker Hub automáticamente
+          tags: ${{ secrets.USER_DOCKERHUB }}/mi-app-aws:latest
